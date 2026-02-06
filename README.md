@@ -1,6 +1,6 @@
 # Ada Handoffs API Documentation
 
-External-facing documentation for the Ada Handoffs API (v2).
+External-facing documentation for the Ada Handoffs API (v2) that is CURRENTLY IN DEVELOPMENT. Not to be shared outside of pilot customers who are in need of migrating Sunco-reliant custom handoffs before June 2026.
 
 ## View the docs
 
