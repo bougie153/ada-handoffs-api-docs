@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ada Handoffs API Documentation</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --sidebar-bg: #f8f9fb;
+    --border: #e2e6ed;
+    --text: #1a1f36;
+    --text-muted: #5a6178;
+    --text-light: #8792a8;
+    --accent: #635bff;
+    --accent-light: #e8e6ff;
+    --code-bg: #f4f5f7;
+    --success: #0ea371;
+    --success-bg: #e6f9f1;
+    --warning: #e68a00;
+    --warning-bg: #fff7e6;
+    --error: #df1b41;
+    --error-bg: #fde8ed;
+    --info: #0073e6;
+    --info-bg: #e6f2ff;
+    --post: #49b6a8;
+    --get: #0073e6;
+    --patch: #e68a00;
+    --webhook: #8b5cf6;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', Menlo, Courier, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    color: var(--text);
+    line-height: 1.6;
+    background: var(--bg);
+  }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 24px 0;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .sidebar-logo h2 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  .sidebar-logo span {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+    display: block;
+    margin-top: 2px;
+  }
+
+  .sidebar-section {
+    padding: 12px 24px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-light);
+  }
+
+  .sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 24px;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+
+  .sidebar a:hover {
+    color: var(--text);
+    background: rgba(99, 91, 255, 0.04);
+  }
+
+  .sidebar a .method-badge-sm {
+    font-size: 9px;
+    font-weight: 700;
+    font-family: var(--mono);
+    padding: 1px 5px;
+    border-radius: 3px;
+    min-width: 36px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .method-post { background: #e6f5f3; color: var(--post); }
+  .method-get { background: var(--info-bg); color: var(--get); }
+  .method-patch { background: var(--warning-bg); color: var(--patch); }
+  .method-webhook { background: #f0ebff; color: var(--webhook); }
+
+  /* Main content */
+  .main {
+    margin-left: 280px;
+    max-width: 960px;
+    padding: 48px 56px 120px;
+  }
+
+  .page-header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .page-header p {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 640px;
+    line-height: 1.7;
+  }
+
+  /* Auth section */
+  .auth-box {
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 48px;
+  }
+
+  .auth-box h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .auth-box p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .auth-box code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* Base URL */
+  .base-url {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    margin-bottom: 48px;
+    color: var(--text-muted);
+  }
+
+  .base-url strong { color: var(--text); }
+
+  /* Endpoint section */
+  .endpoint {
+    margin-bottom: 56px;
+    scroll-margin-top: 24px;
+  }
+
+  .endpoint-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .endpoint-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .method-badge {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--mono);
+    padding: 3px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .endpoint-path {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text-muted);
+    background: var(--code-bg);
+    padding: 10px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+
+  .endpoint-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.7;
+  }
+
+  /* Callout */
+  .callout {
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .callout-info { background: var(--info-bg); border-left: 3px solid var(--info); color: #004a94; }
+  .callout-warning { background: var(--warning-bg); border-left: 3px solid var(--warning); color: #8a5300; }
+
+  /* Tables */
+  .params-section h3, .schema-section h3, .responses-section h3 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-light);
+    margin-bottom: 12px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 13px;
+  }
+
+  thead th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-light);
+    padding: 8px 12px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  td .field-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  td .field-type {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  td .field-required {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--error);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  td .field-desc {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  td .field-enum {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin: 0 2px;
+  }
+
+  /* Code blocks */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .code-block-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #a6adc8;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .code-block pre {
+    padding: 16px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+
+  .code-block .key { color: #89b4fa; }
+  .code-block .string { color: #a6e3a1; }
+  .code-block .number { color: #fab387; }
+  .code-block .null { color: #f38ba8; }
+  .code-block .bool { color: #fab387; }
+  .code-block .comment { color: #6c7086; font-style: italic; }
+
+  /* Response codes */
+  .response-codes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .response-code {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .response-code .code {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  .response-code .code-2xx { color: var(--success); }
+  .response-code .code-4xx { color: var(--warning); }
+  .response-code .code-5xx { color: var(--error); }
+
+  .response-code .label {
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+
+  /* Divider */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 56px 0;
+  }
+
+  /* Webhook section header */
+  .section-header {
+    margin-bottom: 32px;
+    scroll-margin-top: 24px;
+  }
+
+  .section-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+
+  .section-header p {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  /* nested object indicator */
+  .nested-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 16px 0 8px;
+    padding-left: 12px;
+    border-left: 2px solid var(--accent-light);
+  }
+
+  .indent-table {
+    margin-left: 12px;
+    border-left: 2px solid var(--accent-light);
+    padding-left: 0;
+  }
+
+  .indent-table td:first-child, .indent-table th:first-child {
+    padding-left: 16px;
+  }
+
+  /* Webhook event name */
+  .webhook-event-name {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--webhook);
+    background: #f0ebff;
+    padding: 10px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    border: 1px solid #e0d8ff;
+  }
+
+  /* Error schema */
+  .error-schema {
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 48px;
+  }
+
+  .error-schema h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  /* handoff_integration highlight */
+  .highlight-field {
+    background: #fef9c3;
+    padding: 0 3px;
+    border-radius: 2px;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 32px 24px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <h2>Ada Handoffs API</h2>
+    <span>v2 &middot; Early Access</span>
+  </div>
+
+  <div class="sidebar-section">Pages</div>
+  <a href="index.html">Overview</a>
+  <a href="reference.html" style="color: var(--accent); background: rgba(99,91,255,0.06); font-weight: 600;">API Reference</a>
+
+  <div class="sidebar-section">Reference</div>
+  <a href="#authentication">Authentication</a>
+  <a href="#base-url">Base URL</a>
+  <a href="#errors">Error Format</a>
+
+  <div class="sidebar-section">Endpoints</div>
+  <a href="#send-message">
+    <span class="method-badge-sm method-post">POST</span> Send Message
+  </a>
+  <a href="#fetch-messages">
+    <span class="method-badge-sm method-get">GET</span> Fetch Messages
+  </a>
+  <a href="#update-conversation">
+    <span class="method-badge-sm method-patch">PATCH</span> Update Conversation
+  </a>
+  <a href="#upload-attachment">
+    <span class="method-badge-sm method-post">POST</span> Upload Attachment
+  </a>
+  <a href="#end-handoff">
+    <span class="method-badge-sm method-post">POST</span> End Handoff
+  </a>
+
+  <div class="sidebar-section">Webhooks</div>
+  <a href="#webhook-message">
+    <span class="method-badge-sm method-webhook">EVENT</span> Conversation Message
+  </a>
+  <a href="#webhook-handoff-ended">
+    <span class="method-badge-sm method-webhook">EVENT</span> Handoff Ended
+  </a>
+
+  <div class="sidebar-section">Reference</div>
+  <a href="#handoff-integration-field">handoff_integration Field</a>
+</nav>
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Ada Handoffs API</h1>
+    <p>
+      Integrate with Ada's conversation handoff system. These endpoints and webhooks let you
+      send and receive messages during a handoff, manage conversation metadata, transfer files,
+      and receive real-time notifications about handoff lifecycle events.
+    </p>
+  </div>
+
+  <!-- Authentication -->
+  <div class="auth-box" id="authentication">
+    <h3>Authentication</h3>
+    <p>All requests require a Bearer token in the <code>Authorization</code> header.</p>
+    <div class="code-block" style="margin-bottom: 0;">
+      <pre><span class="key">Authorization</span>: <span class="string">Bearer &lt;your_api_token&gt;</span></pre>
+    </div>
+  </div>
+
+  <!-- Base URL -->
+  <div id="base-url" style="margin-bottom: 48px;">
+    <div class="sidebar-section" style="padding-left: 0; margin-bottom: 8px;">Base URL</div>
+    <div class="base-url">
+      <strong>https://{handle}.ada.support/api/v2</strong>
+    </div>
+    <p style="font-size: 13px; color: var(--text-muted);">
+      Replace <code style="font-family: var(--mono); font-size: 12px; background: var(--code-bg); padding: 1px 5px; border-radius: 3px;">{handle}</code> with your Ada subdomain.
+    </p>
+  </div>
+
+  <!-- Error Format -->
+  <div class="error-schema" id="errors">
+    <h3>Error Response Format</h3>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+      All error responses follow a consistent structure. The <code style="font-family: var(--mono); font-size: 12px; background: var(--code-bg); padding: 1px 5px; border-radius: 3px;">errors</code> array contains one or more error objects.
+    </p>
+    <div class="code-block" style="margin-bottom: 0;">
+      <div class="code-block-header"><span class="code-block-label">Error Response</span></div>
+      <pre>{
+  <span class="key">"errors"</span>: [
+    {
+      <span class="key">"type"</span>: <span class="string">"resource_not_found"</span>,
+      <span class="key">"message"</span>: <span class="string">"The requested resource was not found"</span>,
+      <span class="key">"details"</span>: <span class="string">"The requested resource with id 123456abcdef was not found"</span>
+    }
+  ]
+}</pre>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- =============================== -->
+  <!-- ENDPOINT: Send Message           -->
+  <!-- =============================== -->
+  <div class="endpoint" id="send-message">
+    <div class="endpoint-header">
+      <span class="method-badge method-post">POST</span>
+      <h2>Send Message</h2>
+    </div>
+    <div class="endpoint-path">/v2/conversations/{conversation_id}/messages/</div>
+    <p class="endpoint-desc">
+      Create a new message in a conversation on behalf of an end user, human agent, or the handoff system.
+      Supports text and file content types. Maximum request size is 10 MB.
+    </p>
+
+    <div class="params-section">
+      <h3>Path Parameters</h3>
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">conversation_id</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The ID of the conversation</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="schema-section">
+      <h3>Request Body</h3>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">author</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">Information about the message author (see below)</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">content</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">The message content &mdash; one of <span class="field-enum">text</span> or <span class="field-enum">file</span></span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="nested-label">author object</div>
+      <table class="indent-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">role</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The author's role: <span class="field-enum">end_user</span> <span class="field-enum">human_agent</span></span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">id</span></td>
+            <td><span class="field-type">string | null</span></td>
+            <td><span class="field-desc">The end user's ID. Required when role is <span class="field-enum">end_user</span>.</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">display_name</span></td>
+            <td><span class="field-type">string | null</span></td>
+            <td><span class="field-desc">Display name shown in conversation. Required when role is <span class="field-enum">human_agent</span>.</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">avatar</span></td>
+            <td><span class="field-type">string | null</span></td>
+            <td><span class="field-desc">URL of the author's avatar image</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="nested-label">content &mdash; text type</div>
+      <table class="indent-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">type</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">Must be <span class="field-enum">text</span></span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">body</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The text body of the message</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="nested-label">content &mdash; file type</div>
+      <table class="indent-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">type</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">Must be <span class="field-enum">file</span></span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">url</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string (uri)</span></td>
+            <td><span class="field-desc">Presigned URL from the attachment upload endpoint (valid for 7 days)</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">mime_type</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">MIME type of the file (e.g. <span class="field-enum">application/pdf</span>)</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">filename</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">Name of the file</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header"><span class="code-block-label">Example &mdash; Text Message</span></div>
+      <pre>{
+  <span class="key">"author"</span>: {
+    <span class="key">"role"</span>: <span class="string">"human_agent"</span>,
+    <span class="key">"display_name"</span>: <span class="string">"Ada Lovelace"</span>,
+    <span class="key">"avatar"</span>: <span class="string">"https://www.gravatar.com/avatar/example"</span>
+  },
+  <span class="key">"content"</span>: {
+    <span class="key">"type"</span>: <span class="string">"text"</span>,
+    <span class="key">"body"</span>: <span class="string">"Hello, how can I help you?"</span>
+  }
+}</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header"><span class="code-block-label">Example &mdash; File Message</span></div>
+      <pre>{
+  <span class="key">"author"</span>: {
+    <span class="key">"role"</span>: <span class="string">"human_agent"</span>,
+    <span class="key">"display_name"</span>: <span class="string">"Ada Lovelace"</span>
+  },
+  <span class="key">"content"</span>: {
+    <span class="key">"type"</span>: <span class="string">"file"</span>,
+    <span class="key">"url"</span>: <span class="string">"https://s3.amazonaws.com/bucket/.../document.pdf?X-Amz-..."</span>,
+    <span class="key">"mime_type"</span>: <span class="string">"application/pdf"</span>,
+    <span class="key">"filename"</span>: <span class="string">"document.pdf"</span>
+  }
+}</pre>
+    </div>
+
+    <div class="schema-section">
+      <h3>Response (201 Created)</h3>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">id</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The message ID</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">conversation_id</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The conversation ID</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">author</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">The message author (same structure as request)</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">content</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">The message content (text or file)</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">created_at</span></td>
+            <td><span class="field-type">string (datetime)</span></td>
+            <td><span class="field-desc">When the message was created</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">updated_at</span></td>
+            <td><span class="field-type">string (datetime)</span></td>
+            <td><span class="field-desc">When the message was last updated</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="responses-section">
+      <h3>Response Codes</h3>
+      <div class="response-codes">
+        <div class="response-code"><span class="code code-2xx">201</span><span class="label">Created</span></div>
+        <div class="response-code"><span class="code code-4xx">400</span><span class="label">Bad Request</span></div>
+        <div class="response-code"><span class="code code-4xx">401</span><span class="label">Unauthorized</span></div>
+        <div class="response-code"><span class="code code-4xx">404</span><span class="label">Not Found</span></div>
+        <div class="response-code"><span class="code code-4xx">429</span><span class="label">Too Many Requests</span></div>
+        <div class="response-code"><span class="code code-5xx">500</span><span class="label">Internal Server Error</span></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- =============================== -->
+  <!-- ENDPOINT: Fetch Messages         -->
+  <!-- =============================== -->
+  <div class="endpoint" id="fetch-messages">
+    <div class="endpoint-header">
+      <span class="method-badge method-get">GET</span>
+      <h2>Fetch Messages</h2>
+    </div>
+    <div class="endpoint-path">/v2/conversations/{conversation_id}/messages/</div>
+    <p class="endpoint-desc">
+      Retrieve a paginated list of messages for a conversation. Returns text, link, and file content types. Uses cursor-based pagination.
+    </p>
+
+    <div class="params-section">
+      <h3>Path Parameters</h3>
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">conversation_id</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The ID of the conversation</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Query Parameters</h3>
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">cursor</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">Pagination cursor. Use the value from <code style="font-family: var(--mono); font-size: 11px;">meta.next_page_url</code> in the previous response.</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">limit</span></td>
+            <td><span class="field-type">integer</span></td>
+            <td><span class="field-desc">Maximum messages to return. Range: 1&ndash;100. Default: 100.</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="schema-section">
+      <h3>Response (200 OK)</h3>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">data</span></td>
+            <td><span class="field-type">array</span></td>
+            <td><span class="field-desc">Array of message objects (see below)</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">meta</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">Pagination metadata with <code style="font-family: var(--mono); font-size: 11px;">next_page_url</code> (null if no more pages)</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="nested-label">message object (in data array)</div>
+      <table class="indent-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">type</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">Always <span class="field-enum">message_logs</span></span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">message_id</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The message ID</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">created_at</span></td>
+            <td><span class="field-type">string (datetime)</span></td>
+            <td><span class="field-desc">When the message was created</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">author</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">Author with <code style="font-family: var(--mono); font-size: 11px;">id</code>, <code style="font-family: var(--mono); font-size: 11px;">role</code> (<span class="field-enum">end_user</span> <span class="field-enum">ai_agent</span> <span class="field-enum">human_agent</span>), <code style="font-family: var(--mono); font-size: 11px;">display_name</code>, <code style="font-family: var(--mono); font-size: 11px;">avatar</code></span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">content</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">Message content: <span class="field-enum">text</span>, <span class="field-enum">link</span>, or <span class="field-enum">file</span> (same schemas as Send Message, plus link type)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header"><span class="code-block-label">Example Response</span></div>
+      <pre>{
+  <span class="key">"data"</span>: [
+    {
+      <span class="key">"type"</span>: <span class="string">"message_logs"</span>,
+      <span class="key">"message_id"</span>: <span class="string">"6900e297d458517e4b15787d"</span>,
+      <span class="key">"created_at"</span>: <span class="string">"2025-10-28T15:34:41+00:00"</span>,
+      <span class="key">"author"</span>: {
+        <span class="key">"id"</span>: <span class="null">null</span>,
+        <span class="key">"role"</span>: <span class="string">"ai_agent"</span>,
+        <span class="key">"display_name"</span>: <span class="null">null</span>,
+        <span class="key">"avatar"</span>: <span class="null">null</span>
+      },
+      <span class="key">"content"</span>: {
+        <span class="key">"type"</span>: <span class="string">"text"</span>,
+        <span class="key">"body"</span>: <span class="string">"Hello! I'm an AI Agent, here to assist."</span>
+      }
+    },
+    {
+      <span class="key">"type"</span>: <span class="string">"message_logs"</span>,
+      <span class="key">"message_id"</span>: <span class="string">"6900e299d458517e4b157881"</span>,
+      <span class="key">"created_at"</span>: <span class="string">"2025-10-28T15:34:49+00:00"</span>,
+      <span class="key">"author"</span>: {
+        <span class="key">"id"</span>: <span class="string">"6900e28ff6f931ca8672f6dd"</span>,
+        <span class="key">"role"</span>: <span class="string">"end_user"</span>,
+        <span class="key">"display_name"</span>: <span class="null">null</span>,
+        <span class="key">"avatar"</span>: <span class="null">null</span>
+      },
+      <span class="key">"content"</span>: {
+        <span class="key">"type"</span>: <span class="string">"text"</span>,
+        <span class="key">"body"</span>: <span class="string">"I need help with my order"</span>
+      }
+    }
+  ],
+  <span class="key">"meta"</span>: {
+    <span class="key">"next_page_url"</span>: <span class="string">"https://example.ada.support/api/v2/conversations/abc123/messages/?cursor=NjkwMGUy..."</span>
+  }
+}</pre>
+    </div>
+
+    <div class="responses-section">
+      <h3>Response Codes</h3>
+      <div class="response-codes">
+        <div class="response-code"><span class="code code-2xx">200</span><span class="label">OK</span></div>
+        <div class="response-code"><span class="code code-4xx">400</span><span class="label">Bad Request</span></div>
+        <div class="response-code"><span class="code code-4xx">401</span><span class="label">Unauthorized</span></div>
+        <div class="response-code"><span class="code code-4xx">404</span><span class="label">Not Found</span></div>
+        <div class="response-code"><span class="code code-4xx">429</span><span class="label">Too Many Requests</span></div>
+        <div class="response-code"><span class="code code-5xx">500</span><span class="label">Internal Server Error</span></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- =============================== -->
+  <!-- ENDPOINT: Update Conversation    -->
+  <!-- =============================== -->
+  <div class="endpoint" id="update-conversation">
+    <div class="endpoint-header">
+      <span class="method-badge method-patch">PATCH</span>
+      <h2>Update Conversation</h2>
+    </div>
+    <div class="endpoint-path">/v2/conversations/{conversation_id}/</div>
+    <p class="endpoint-desc">
+      Update a conversation's metadata additively. Use this to attach external IDs, store handoff state, or add any custom key-value pairs. Setting a key's value to <code style="font-family: var(--mono); font-size: 13px;">null</code> removes it.
+    </p>
+
+    <div class="params-section">
+      <h3>Path Parameters</h3>
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">conversation_id</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The ID of the conversation to update</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="schema-section">
+      <h3>Request Body</h3>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">metadata</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">object</span></td>
+            <td>
+              <span class="field-desc">
+                Key-value pairs to merge into existing metadata.<br>
+                Keys: <span class="field-enum">string</span><br>
+                Values: <span class="field-enum">string</span>, <span class="field-enum">boolean</span>, <span class="field-enum">integer</span>, or <span class="field-enum">null</span> (to delete a key)
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header"><span class="code-block-label">Example Request</span></div>
+      <pre>{
+  <span class="key">"metadata"</span>: {
+    <span class="key">"external_ticket_id"</span>: <span class="string">"TICKET-4821"</span>,
+    <span class="key">"priority"</span>: <span class="string">"high"</span>,
+    <span class="key">"escalated"</span>: <span class="bool">true</span>,
+    <span class="key">"remove_this_key"</span>: <span class="null">null</span>
+  }
+}</pre>
+    </div>
+
+    <div class="schema-section">
+      <h3>Response (200 OK)</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Returns the full updated Conversation object.</p>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">id</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The conversation ID</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">channel_id</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The channel ID</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">end_user_id</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The end user's ID</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">status</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc"><span class="field-enum">active</span> or <span class="field-enum">ended</span></span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">created_at</span></td>
+            <td><span class="field-type">string (datetime)</span></td>
+            <td><span class="field-desc">When the conversation was created</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">updated_at</span></td>
+            <td><span class="field-type">string (datetime)</span></td>
+            <td><span class="field-desc">When the conversation was last updated</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">metadata</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">The full merged metadata dictionary</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="responses-section">
+      <h3>Response Codes</h3>
+      <div class="response-codes">
+        <div class="response-code"><span class="code code-2xx">200</span><span class="label">OK</span></div>
+        <div class="response-code"><span class="code code-4xx">400</span><span class="label">Bad Request</span></div>
+        <div class="response-code"><span class="code code-4xx">401</span><span class="label">Unauthorized</span></div>
+        <div class="response-code"><span class="code code-4xx">404</span><span class="label">Not Found</span></div>
+        <div class="response-code"><span class="code code-4xx">429</span><span class="label">Too Many Requests</span></div>
+        <div class="response-code"><span class="code code-5xx">500</span><span class="label">Internal Server Error</span></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- =============================== -->
+  <!-- ENDPOINT: Upload Attachment      -->
+  <!-- =============================== -->
+  <div class="endpoint" id="upload-attachment">
+    <div class="endpoint-header">
+      <span class="method-badge method-post">POST</span>
+      <h2>Upload Attachment</h2>
+    </div>
+    <div class="endpoint-path">/v2/conversations/{conversation_id}/attachments/</div>
+    <p class="endpoint-desc">
+      Upload a file attachment to a conversation. Returns a presigned URL (valid for 7 days) that can be used
+      to send a file message via the Send Message endpoint.
+    </p>
+
+    <div class="callout callout-info">
+      Attachments can only be uploaded when the conversation is in a <strong>handoff state</strong>.
+    </div>
+
+    <div class="params-section">
+      <h3>Path Parameters</h3>
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">conversation_id</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The ID of the conversation</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="schema-section">
+      <h3>Request Body</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+        Content-Type: <code style="font-family: var(--mono); font-size: 12px;">multipart/form-data</code>
+      </p>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">file</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">binary</span></td>
+            <td><span class="field-desc">The file to upload. Maximum size: 50 MB.</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-warning">
+      <strong>Allowed file types:</strong> TXT, LOG, CSV, EML, PNG, SVG, JPEG, JPG, GIF, HEIF, HEIC, AVIF, WAV, M4A, MP3, MP4, M4V, MOV, MPEG, MPG, ZIP, PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, Keynote, Pages, Numbers
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header"><span class="code-block-label">Example Request (cURL)</span></div>
+      <pre><span class="comment"># Upload a file attachment</span>
+curl -X POST \
+  https://{handle}.ada.support/api/v2/conversations/{conversation_id}/attachments/ \
+  -H <span class="string">"Authorization: Bearer &lt;token&gt;"</span> \
+  -F <span class="string">"file=@/path/to/document.pdf"</span></pre>
+    </div>
+
+    <div class="schema-section">
+      <h3>Response (201 Created)</h3>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">url</span></td>
+            <td><span class="field-type">string (uri)</span></td>
+            <td><span class="field-desc">Presigned URL to access the uploaded file (valid for 7 days). Use this in the Send Message endpoint with <span class="field-enum">file</span> content type.</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">mime_type</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">MIME type of the uploaded file</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">filename</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">Name of the uploaded file</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header"><span class="code-block-label">Example Response</span></div>
+      <pre>{
+  <span class="key">"url"</span>: <span class="string">"https://s3.amazonaws.com/bucket/conversations/.../document.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;..."</span>,
+  <span class="key">"mime_type"</span>: <span class="string">"application/pdf"</span>,
+  <span class="key">"filename"</span>: <span class="string">"document.pdf"</span>
+}</pre>
+    </div>
+
+    <div class="responses-section">
+      <h3>Response Codes</h3>
+      <div class="response-codes">
+        <div class="response-code"><span class="code code-2xx">201</span><span class="label">Created</span></div>
+        <div class="response-code"><span class="code code-4xx">400</span><span class="label">Bad Request</span></div>
+        <div class="response-code"><span class="code code-4xx">401</span><span class="label">Unauthorized</span></div>
+        <div class="response-code"><span class="code code-4xx">404</span><span class="label">Not Found</span></div>
+        <div class="response-code"><span class="code code-4xx">429</span><span class="label">Too Many Requests</span></div>
+        <div class="response-code"><span class="code code-5xx">500</span><span class="label">Internal Server Error</span></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- =============================== -->
+  <!-- ENDPOINT: End Handoff            -->
+  <!-- =============================== -->
+  <div class="endpoint" id="end-handoff">
+    <div class="endpoint-header">
+      <span class="method-badge method-post">POST</span>
+      <h2>End Handoff</h2>
+    </div>
+    <div class="endpoint-path">/v2/conversations/{conversation_id}/end-handoff/</div>
+    <p class="endpoint-desc">
+      Ends the handoff for the specified conversation and returns control to the Ada AI Agent.
+      This does <strong>not</strong> end the conversation itself. It triggers handoff-end processing, CSAT
+      for the human agent (where applicable), leftover blocks processing, and agent presence dismissal messages.
+    </p>
+
+    <div class="params-section">
+      <h3>Path Parameters</h3>
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">conversation_id</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The ID of the conversation to end handoff for</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">No request body required.</p>
+
+    <div class="code-block">
+      <div class="code-block-header"><span class="code-block-label">Example Response (200 OK)</span></div>
+      <pre>{
+  <span class="key">"message"</span>: <span class="string">"Handoff ended successfully."</span>
+}</pre>
+    </div>
+
+    <div class="responses-section">
+      <h3>Response Codes</h3>
+      <div class="response-codes">
+        <div class="response-code"><span class="code code-2xx">200</span><span class="label">OK</span></div>
+        <div class="response-code"><span class="code code-4xx">404</span><span class="label">Conversation not found</span></div>
+        <div class="response-code"><span class="code code-4xx">422</span><span class="label">Not in active handoff</span></div>
+        <div class="response-code"><span class="code code-5xx">500</span><span class="label">Internal Server Error</span></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- =============================== -->
+  <!-- WEBHOOKS SECTION                 -->
+  <!-- =============================== -->
+  <div class="section-header" id="webhooks-section">
+    <h2>Webhooks</h2>
+    <p>
+      Ada sends webhook events to your configured endpoint as HTTP POST requests with a JSON payload.
+      Return a <code style="font-family: var(--mono); font-size: 13px;">200</code> status to acknowledge receipt.
+    </p>
+  </div>
+
+  <!-- Webhook: Conversation Message -->
+  <div class="endpoint" id="webhook-message">
+    <div class="endpoint-header">
+      <span class="method-badge method-webhook">EVENT</span>
+      <h2>Conversation Message</h2>
+    </div>
+    <div class="webhook-event-name">v1.conversation.message</div>
+    <p class="endpoint-desc">
+      Fired when a message is sent in a conversation. Includes text, file, and link content types.
+      During a handoff, the <code style="font-family: var(--mono); font-size: 13px;">handoff_integration</code> field
+      identifies which integration owns the handoff, allowing you to determine if the message is directed to your system.
+    </p>
+
+    <div class="schema-section">
+      <h3>Payload</h3>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">type</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">Always <span class="field-enum">v1.conversation.message</span></span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">timestamp</span></td>
+            <td><span class="field-type">string (datetime)</span></td>
+            <td><span class="field-desc">When the event was generated (millisecond precision for ordering)</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">data</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">The event data (see below)</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="nested-label">data object</div>
+      <table class="indent-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">message_id</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The ID of the message that triggered the event</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">conversation_id</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The ID of the conversation</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">end_user_id</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The ID of the end user</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name highlight-field">handoff_integration</span></td>
+            <td><span class="field-type">string | null</span></td>
+            <td><span class="field-desc">The name of the handoff integration if the message is part of a handoff. <strong>Null</strong> when the message is directed to the AI Agent. Examples: <span class="field-enum">zendesk_chat</span>, <span class="field-enum">salesforce</span>, <span class="field-enum">custom-handoff</span></span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">channel</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">Channel info: <code style="font-family: var(--mono); font-size: 11px;">id</code>, <code style="font-family: var(--mono); font-size: 11px;">name</code>, <code style="font-family: var(--mono); font-size: 11px;">description</code>, <code style="font-family: var(--mono); font-size: 11px;">modality</code>, <code style="font-family: var(--mono); font-size: 11px;">type</code> (<span class="field-enum">native</span> or <span class="field-enum">custom</span>), <code style="font-family: var(--mono); font-size: 11px;">metadata</code>, <code style="font-family: var(--mono); font-size: 11px;">created_at</code></span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">created_at</span></td>
+            <td><span class="field-type">string (datetime)</span></td>
+            <td><span class="field-desc">When the message was created</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">author</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">Author with <code style="font-family: var(--mono); font-size: 11px;">id</code>, <code style="font-family: var(--mono); font-size: 11px;">role</code> (<span class="field-enum">end_user</span> <span class="field-enum">ai_agent</span> <span class="field-enum">human_agent</span>), <code style="font-family: var(--mono); font-size: 11px;">avatar</code>, <code style="font-family: var(--mono); font-size: 11px;">display_name</code></span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">content</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">Message content: <span class="field-enum">text</span> (<code style="font-family: var(--mono); font-size: 11px;">body</code>), <span class="field-enum">file</span> (<code style="font-family: var(--mono); font-size: 11px;">url</code>, <code style="font-family: var(--mono); font-size: 11px;">mime_type</code>, <code style="font-family: var(--mono); font-size: 11px;">filename</code>), or <span class="field-enum">link</span> (<code style="font-family: var(--mono); font-size: 11px;">url</code>, <code style="font-family: var(--mono); font-size: 11px;">link_text</code>)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header"><span class="code-block-label">Example Payload &mdash; End User Message During Handoff</span></div>
+      <pre>{
+  <span class="key">"type"</span>: <span class="string">"v1.conversation.message"</span>,
+  <span class="key">"timestamp"</span>: <span class="string">"2025-10-28T15:34:49+00:00"</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"message_id"</span>: <span class="string">"61f46e0b-fa39-4e44-850b-c1ca8f958dd3"</span>,
+    <span class="key">"conversation_id"</span>: <span class="string">"5f7e0e2c1e7c7e000f0f9c3a"</span>,
+    <span class="key">"end_user_id"</span>: <span class="string">"5f7e0e2c1e7c7e000f0f9c3a"</span>,
+    <span class="key">"handoff_integration"</span>: <span class="string">"custom-handoff"</span>,
+    <span class="key">"channel"</span>: {
+      <span class="key">"id"</span>: <span class="string">"5f7e0e2c1e7c7e000f0f9c3a"</span>,
+      <span class="key">"name"</span>: <span class="string">"My Custom Channel"</span>,
+      <span class="key">"description"</span>: <span class="string">"A custom messaging channel for my AI Agent"</span>,
+      <span class="key">"modality"</span>: <span class="string">"messaging"</span>,
+      <span class="key">"type"</span>: <span class="string">"custom"</span>,
+      <span class="key">"metadata"</span>: { <span class="key">"example_key"</span>: <span class="string">"example_value"</span> },
+      <span class="key">"created_at"</span>: <span class="string">"2020-09-20T00:00:00+00:00"</span>
+    },
+    <span class="key">"created_at"</span>: <span class="string">"2025-10-28T15:34:49+00:00"</span>,
+    <span class="key">"author"</span>: {
+      <span class="key">"id"</span>: <span class="string">"5df263b7db5a7e6ea03fae9b"</span>,
+      <span class="key">"role"</span>: <span class="string">"end_user"</span>,
+      <span class="key">"avatar"</span>: <span class="string">"https://www.gravatar.com/avatar/example"</span>,
+      <span class="key">"display_name"</span>: <span class="string">"Ada Lovelace"</span>
+    },
+    <span class="key">"content"</span>: {
+      <span class="key">"type"</span>: <span class="string">"text"</span>,
+      <span class="key">"body"</span>: <span class="string">"I need help with my order"</span>
+    }
+  }
+}</pre>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Webhook: Handoff Ended -->
+  <div class="endpoint" id="webhook-handoff-ended">
+    <div class="endpoint-header">
+      <span class="method-badge method-webhook">EVENT</span>
+      <h2>Handoff Ended</h2>
+    </div>
+    <div class="webhook-event-name">v1.conversation.handoff.ended</div>
+    <p class="endpoint-desc">
+      Fired when a handoff ends for a conversation. This is distinct from the conversation ending &mdash;
+      it specifically signals that the handoff was terminated and control has been returned to the AI Agent.
+    </p>
+
+    <div class="schema-section">
+      <h3>Payload</h3>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">type</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">Always <span class="field-enum">v1.conversation.handoff.ended</span></span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">timestamp</span></td>
+            <td><span class="field-type">string (datetime)</span></td>
+            <td><span class="field-desc">When the event was generated (millisecond precision)</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">data</span></td>
+            <td><span class="field-type">object</span></td>
+            <td><span class="field-desc">The event data (see below)</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="nested-label">data object</div>
+      <table class="indent-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">conversation_id</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The ID of the conversation where the handoff was ended</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">end_user_id</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The ID of the end user</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name highlight-field">handoff_integration</span> <span class="field-required">required</span></td>
+            <td><span class="field-type">string</span></td>
+            <td><span class="field-desc">The handoff integration that was ended (e.g. <span class="field-enum">custom-handoff</span>)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header"><span class="code-block-label">Example Payload</span></div>
+      <pre>{
+  <span class="key">"type"</span>: <span class="string">"v1.conversation.handoff.ended"</span>,
+  <span class="key">"timestamp"</span>: <span class="string">"2025-10-28T16:00:00+00:00"</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"conversation_id"</span>: <span class="string">"5df263b7db5a7e6ea03fae9b"</span>,
+    <span class="key">"end_user_id"</span>: <span class="string">"5f7e0e2c1e7c7e000f0f9c3a"</span>,
+    <span class="key">"handoff_integration"</span>: <span class="string">"custom-handoff"</span>
+  }
+}</pre>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- =============================== -->
+  <!-- REFERENCE: handoff_integration   -->
+  <!-- =============================== -->
+  <div class="endpoint" id="handoff-integration-field">
+    <div class="section-header">
+      <h2>The <code style="font-family: var(--mono); font-size: 20px; background: var(--code-bg); padding: 2px 8px; border-radius: 4px;">handoff_integration</code> Field</h2>
+    </div>
+    <p class="endpoint-desc">
+      The <code style="font-family: var(--mono); font-size: 13px;">handoff_integration</code> field appears on both the
+      <strong>v1.conversation.message</strong> and <strong>v1.conversation.handoff.ended</strong> webhook payloads.
+      It identifies which external system currently owns the active handoff.
+    </p>
+
+    <div class="callout callout-info">
+      <strong>How to use it:</strong> When you receive a <code style="font-family: var(--mono); font-size: 12px;">v1.conversation.message</code> webhook,
+      check the <code style="font-family: var(--mono); font-size: 12px;">handoff_integration</code> value to determine if the message
+      is directed to your integration. If it matches your integration name, the end user's message should be
+      routed to your human agent. If it's <code style="font-family: var(--mono); font-size: 12px;">null</code>,
+      the message is directed to the AI Agent and can be ignored by your integration.
+    </div>
+
+    <table>
+      <thead><tr><th>Value</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="field-type">null</span></td>
+          <td><span class="field-desc">Message is directed to the AI Agent (no active handoff to your system)</span></td>
+        </tr>
+        <tr>
+          <td><span class="field-type">"your-integration-name"</span></td>
+          <td><span class="field-desc">Message is part of a handoff owned by your integration &mdash; route to your human agent</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>
